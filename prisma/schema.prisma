@@ -1,0 +1,226 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ConversationStatus {
+  ACTIVE
+  WAITING_HUMAN
+  CLOSED
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum SenderType {
+  CUSTOMER
+  AI
+  STAFF
+  SYSTEM
+}
+
+enum Intent {
+  GREETING
+  UNKNOWN
+  FAQ_OPENING_HOURS
+  FAQ_ADDRESS
+  FAQ_PHONE
+  RESERVATION_CREATE
+  RESERVATION_UPDATE
+  RESERVATION_CANCEL
+  MENU_INQUIRY
+  MENU_PRICE
+  MENU_AVAILABILITY
+  GENERAL_AI
+  HUMAN_HANDOFF
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum MenuCategory {
+  HAI_SAN
+  MON_NUONG
+  LAU
+  COM
+  DO_UONG
+  KHAC
+}
+
+enum FaqCategory {
+  OPENING_HOURS
+  ADDRESS
+  PHONE
+  PARKING
+  OTHER
+}
+
+model Customer {
+  id           String   @id @default(uuid()) @db.Uuid
+  facebookPsid String   @unique @map("facebook_psid")
+  name         String?
+  phone        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  conversations Conversation[]
+  reservations  Reservation[]
+
+  @@index([phone])
+  @@map("customers")
+}
+
+model Conversation {
+  id               String             @id @default(uuid()) @db.Uuid
+  customerId       String             @map("customer_id") @db.Uuid
+  facebookThreadId String?            @map("facebook_thread_id")
+  status           ConversationStatus @default(ACTIVE)
+  currentIntent    Intent?            @map("current_intent")
+  contextJson      Json?              @map("context_json")
+  aiEnabled        Boolean            @default(true) @map("ai_enabled")
+  assignedStaffId  String?            @map("assigned_staff_id")
+  lastMessageAt    DateTime?          @map("last_message_at")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  messages     Message[]
+  reservations Reservation[]
+  aiLogs       AiLog[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([lastMessageAt(sort: Desc)])
+  @@index([customerId, status])
+  @@map("conversations")
+}
+
+model Message {
+  id                String           @id @default(uuid()) @db.Uuid
+  conversationId    String           @map("conversation_id") @db.Uuid
+  facebookMessageId String?          @unique @map("facebook_message_id")
+  direction         MessageDirection
+  senderType        SenderType       @map("sender_type")
+  content           String           @db.Text
+  intent            Intent?
+  intentConfidence  Decimal?         @map("intent_confidence") @db.Decimal(5, 2)
+  metadataJson      Json?            @map("metadata_json")
+  createdAt         DateTime         @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  aiLogs       AiLog[]
+
+  @@index([conversationId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+model Reservation {
+  id              String            @id @default(uuid()) @db.Uuid
+  conversationId  String?           @map("conversation_id") @db.Uuid
+  customerId      String            @map("customer_id") @db.Uuid
+  customerName    String            @map("customer_name")
+  customerPhone   String            @map("customer_phone")
+  partySize       Int               @map("party_size")
+  reservationDate DateTime          @map("reservation_date") @db.Date
+  reservationTime String            @map("reservation_time")
+  status          ReservationStatus @default(PENDING)
+  notes           String?           @db.Text
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+  customer     Customer      @relation(fields: [customerId], references: [id])
+
+  @@index([reservationDate])
+  @@index([customerId])
+  @@index([status])
+  @@map("reservations")
+}
+
+model MenuItem {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String
+  category    MenuCategory
+  description String?      @db.Text
+  price       Decimal      @db.Decimal(10, 0)
+  unit        String       @default("đĩa")
+  isAvailable Boolean      @default(true) @map("is_available")
+  isSeasonal  Boolean      @default(false) @map("is_seasonal")
+  sortOrder   Int          @default(0) @map("sort_order")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([isAvailable])
+  @@map("menu_items")
+}
+
+model FaqItem {
+  id        String      @id @default(uuid()) @db.Uuid
+  question  String
+  answer    String      @db.Text
+  category  FaqCategory
+  keywords  String[]
+  isActive  Boolean     @default(true) @map("is_active")
+  sortOrder Int         @default(0) @map("sort_order")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([isActive])
+  @@map("faq_items")
+}
+
+model AiLog {
+  id               String   @id @default(uuid()) @db.Uuid
+  conversationId   String   @map("conversation_id") @db.Uuid
+  messageId        String?  @map("message_id") @db.Uuid
+  promptTokens     Int      @map("prompt_tokens")
+  completionTokens Int      @map("completion_tokens")
+  totalTokens      Int      @map("total_tokens")
+  model            String
+  intentDetected   Intent   @map("intent_detected")
+  confidence       Decimal  @db.Decimal(5, 2)
+  contextUsed      Json     @map("context_used")
+  rawResponse      String?  @map("raw_response") @db.Text
+  latencyMs        Int      @map("latency_ms")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  message      Message?     @relation(fields: [messageId], references: [id])
+
+  @@index([conversationId])
+  @@index([createdAt(sort: Desc)])
+  @@map("ai_logs")
+}
+
+model RestaurantSettings {
+  id                      String   @id @default(uuid()) @db.Uuid
+  restaurantName          String   @map("restaurant_name")
+  address                 String   @db.Text
+  phone                   String
+  openingHours            Json     @map("opening_hours")
+  aiEnabled               Boolean  @default(true) @map("ai_enabled")
+  aiModel                 String   @default("gpt-4o-mini") @map("ai_model")
+  confidenceThreshold     Decimal  @default(70.00) @map("confidence_threshold") @db.Decimal(5, 2)
+  systemPrompt            String   @map("system_prompt") @db.Text
+  facebookPageId          String?  @map("facebook_page_id")
+  facebookPageAccessToken String?  @map("facebook_page_access_token") @db.Text
+  facebookVerifyToken     String?  @map("facebook_verify_token")
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  @@map("restaurant_settings")
+}
