@@ -23,7 +23,7 @@ const TEST_REPLY_MESSAGE =
   'Dạ em nhận tin của anh/chị rồi ạ! Bên em đang test hệ thống, anh/chị chờ em chút nha 🥰';
 
 const DEFAULT_GREETING_REPLY =
-  'Dạ em chào anh/chị! Em có thể hỗ trợ anh/chị về menu, đặt bàn, giờ mở cửa ạ 😊 Anh/chị cần em giúp gì nha?';
+  'Dạ em chào anh/chị! Bên em chuyên cá tươi, chả cá, hành tỏi Lý Sơn ạ 🐟 Chả sống 159k/kg, chả chín 169k/kg. Anh/chị cần em tư vấn gì nha?';
 
 @Injectable()
 export class AiOrchestratorService {

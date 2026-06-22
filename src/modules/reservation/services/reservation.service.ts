@@ -46,7 +46,7 @@ export class ReservationService {
       if (!active) {
         return {
           response:
-            'Dạ em chưa thấy đặt bàn nào của anh/chị ạ. Anh/chị cho em biết thêm chi tiết được không ạ?',
+            'Dạ em chưa thấy đơn hàng nào của anh/chị ạ. Anh/chị cho em biết thêm chi tiết được không ạ?',
           completed: true,
         };
       }
@@ -55,7 +55,7 @@ export class ReservationService {
         contextJson: Prisma.DbNull,
       });
       return {
-        response: 'Dạ em đã hủy đặt bàn giúp anh/chị rồi ạ 😊',
+        response: 'Dạ em đã hủy đơn hàng giúp anh/chị rồi ạ 😊',
         completed: true,
       };
     }
@@ -68,7 +68,7 @@ export class ReservationService {
       await this.saveContext(conversationId, merged);
       return {
         response:
-          'Dạ tối nay bên em vẫn còn bàn anh/chị nha 🥰 Anh/chị đi khoảng mấy người để em giữ bàn cho mình ạ?',
+          'Dạ bên em còn hàng anh/chị nha 🥰 Anh/chị muốn đặt bao nhiêu kg (hoặc số lượng) ạ?',
         completed: false,
       };
     }
@@ -76,7 +76,7 @@ export class ReservationService {
     if (!merged.reservationTime) {
       await this.saveContext(conversationId, merged);
       return {
-        response: `Dạ ${merged.partySize} người ạ. Anh/chị đi lúc mấy giờ để em giữ bàn cho mình ạ?`,
+        response: `Dạ ${merged.partySize} kg ạ. Anh/chị muốn giao lúc mấy giờ để em sắp xếp ạ?`,
         completed: false,
       };
     }
@@ -85,7 +85,7 @@ export class ReservationService {
       await this.saveContext(conversationId, merged);
       return {
         response:
-          'Dạ anh/chị cho em xin số điện thoại để em xác nhận đặt bàn nha 📞',
+          'Dạ anh/chị cho em xin số điện thoại để em xác nhận đơn hàng nha 📞',
         completed: false,
       };
     }
@@ -111,7 +111,7 @@ export class ReservationService {
 
     this.logger.log(`Reservation confirmed for customer ${customerId}`);
     return {
-      response: `Dạ em xác nhận đặt bàn ${merged.partySize} người lúc ${merged.reservationTime} ngày ${reservationDate.toLocaleDateString('vi-VN')} cho anh/chị rồi ạ 🥰 Hẹn gặp anh/chị tại Nhà hàng Đại Hằng nha!`,
+      response: `Dạ em xác nhận đơn ${merged.partySize} kg, giao lúc ${merged.reservationTime} ngày ${reservationDate.toLocaleDateString('vi-VN')} cho anh/chị rồi ạ 🥰 Em sẽ liên hệ sớm nha!`,
       completed: true,
     };
   }

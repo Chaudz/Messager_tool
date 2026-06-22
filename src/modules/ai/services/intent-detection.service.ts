@@ -90,19 +90,19 @@ export class IntentDetectionService {
     } else if (/số điện thoại|hotline|gọi/.test(lower)) {
       intent = Intent.FAQ_PHONE;
       confidence = 90;
-    } else if (/đặt bàn|còn bàn|giữ bàn/.test(lower)) {
+    } else if (/đặt hàng|đặt mua|mua hàng|giao hàng|đặt bàn|còn hàng/.test(lower)) {
       intent = Intent.RESERVATION_CREATE;
       confidence = 90;
-    } else if (/hủy bàn|hủy đặt/.test(lower)) {
+    } else if (/hủy đơn|hủy hàng|hủy đặt/.test(lower)) {
       intent = Intent.RESERVATION_CANCEL;
       confidence = 90;
-    } else if (/giá|bao nhiêu/.test(lower)) {
+    } else if (/giá|bao nhiêu|159|169/.test(lower)) {
       intent = Intent.MENU_PRICE;
       confidence = 85;
     } else if (/còn không|còn hay không/.test(lower)) {
       intent = Intent.MENU_AVAILABILITY;
       confidence = 85;
-    } else if (/menu|món|hải sản|tôm|cua|ốc/.test(lower)) {
+    } else if (/menu|món|cá|chả|hành|tỏi|lý sơn|hải sản/.test(lower)) {
       intent = Intent.MENU_INQUIRY;
       confidence = 85;
     } else if (/tiệc|đoàn|báo giá/.test(lower)) {

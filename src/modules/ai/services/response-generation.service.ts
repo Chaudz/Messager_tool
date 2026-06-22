@@ -93,17 +93,17 @@ export class ResponseGenerationService {
 
   private fallbackResponse(userMessage: string, context: string): string {
     const lower = userMessage.toLowerCase();
-    if (/mở cửa|giờ/.test(lower)) {
-      const match = context.match(/Giờ mở cửa:\n([\s\S]*?)(\n\n|$)/);
-      if (match) return `Dạ bên em mở cửa theo lịch:\n${match[1]}`.trim();
+    if (/mở cửa|giờ|nhận đơn/.test(lower)) {
+      const match = context.match(/Giờ nhận đơn:\n([\s\S]*?)(\n\n|$)/);
+      if (match) return `Dạ bên em nhận đơn theo lịch:\n${match[1]}`.trim();
     }
-    if (/địa chỉ|ở đâu/.test(lower)) {
-      const match = context.match(/Địa chỉ: (.+)/);
-      if (match) return `Dạ nhà hàng em ở ${match[1]} ạ.`;
+    if (/địa chỉ|ở đâu|giao hàng/.test(lower)) {
+      const match = context.match(/Địa chỉ \/ giao hàng: (.+)/);
+      if (match) return `Dạ bên em ${match[1]} ạ.`;
     }
-    if (/menu|món/.test(lower) && context.includes('MENU:')) {
+    if (/menu|món|cá|chả|hành|tỏi/.test(lower) && context.includes('MENU:')) {
       const menuPart = context.split('MENU:')[1]?.split('\n\n')[0];
-      if (menuPart) return `Dạ bên em có các món:\n${menuPart.trim()} 🦐`;
+      if (menuPart) return `Dạ bên em có:\n${menuPart.trim()} 🐟`;
     }
     return HANDOFF_MESSAGE;
   }

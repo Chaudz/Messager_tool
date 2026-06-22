@@ -29,10 +29,13 @@ export class MenuService {
   formatMenuForContext(items: Awaited<ReturnType<MenuRepository['search']>>) {
     if (!items.length) return '';
     return items
-      .map(
-        (item: MenuItem) =>
-          `- ${item.name}: ${item.price.toString()}đ/${item.unit}${item.isAvailable ? '' : ' (hết)'}${item.description ? ` — ${item.description}` : ''}`,
-      )
+      .map((item: MenuItem) => {
+        const price =
+          Number(item.price) > 0
+            ? `${item.price.toString()}đ/${item.unit}`
+            : 'liên hệ báo giá';
+        return `- ${item.name}: ${price}${item.isAvailable ? '' : ' (hết)'}${item.description ? ` — ${item.description}` : ''}`;
+      })
       .join('\n');
   }
 }

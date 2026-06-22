@@ -25,10 +25,10 @@ export class ContextBuilderService {
     const requiresData = !['GREETING', 'HUMAN_HANDOFF', 'UNKNOWN'].includes(intent);
 
     let contextParts: string[] = [
-      `Tên nhà hàng: ${settings.restaurantName}`,
-      `Địa chỉ: ${settings.address}`,
+      `Tên shop: ${settings.restaurantName}`,
+      `Địa chỉ / giao hàng: ${settings.address}`,
       `SĐT: ${settings.phone}`,
-      `Giờ mở cửa:\n${this.settingsService.formatOpeningHours(settings.openingHours as Record<string, string>)}`,
+      `Giờ nhận đơn:\n${this.settingsService.formatOpeningHours(settings.openingHours as Record<string, string>)}`,
     ];
 
     switch (intent) {
